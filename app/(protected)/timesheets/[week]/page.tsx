@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
 import { getTimesheet, TimesheetDetail } from "@/app/lib/timesheets";
 import DayRecord from "@/app/components/DayRecord";
+import Footer from "@/app/components/Footer";
 
 export default function TimesheetDetailPage() {
   const { week } = useParams();
@@ -17,7 +18,7 @@ export default function TimesheetDetailPage() {
   if (isError) return <p>Error loading timesheet.</p>;
 
   return (
-    <section className="container-app px-4 lg:px-0 flex flex-col gap-6">
+    <section className="container-app px-4 lg:px-0 flex flex-col gap-6 pb-24">
       <div className="w-full flex justify-between">
         <h3 className="text-xl leading-none font-bold md:text-2xl">
           This week &apos;s timesheet
@@ -33,6 +34,7 @@ export default function TimesheetDetailPage() {
           week={weekId}
         />
       ))}
+      <Footer />
     </section>
   );
 }
