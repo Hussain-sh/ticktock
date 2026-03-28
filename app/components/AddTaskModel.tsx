@@ -18,6 +18,23 @@ interface TaskFormValues {
   hours: number;
 }
 
+interface Task {
+  id: number;
+  projectId: number;
+  workTypeId: number;
+  taskDescription: string;
+  hours: number;
+}
+
+interface TimesheetEntry {
+  day: string;
+  tasks: Task[];
+}
+
+interface Data {
+  entries: TimesheetEntry[];
+}
+
 const validationSchema = Yup.object({
   projectId: Yup.number().required("Project is required"),
   workTypeId: Yup.number().required("Type of work is required"),
@@ -45,10 +62,27 @@ export default function AddTaskModal({ week, day, onClose }: Props) {
 
   const mutation = useMutation({
     mutationFn: (values: TaskFormValues) => addTask(week, { ...values, day }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["timesheet", week],
-        exact: true,
+    onSuccess: (newTask) => {
+      queryClient.setQueryData(["timesheet", week], (old: Data) => {
+        const existingEntry = old.entries.find(
+          (e: { day: string; tasks: Task[] }) => e.day === day,
+        );
+
+        if (existingEntry) {
+          // add task to existing entry
+          return {
+            ...old,
+            entries: old.entries.map((e: TimesheetEntry) =>
+              e.day === day ? { ...e, tasks: [...e.tasks, newTask] } : e,
+            ),
+          };
+        } else {
+          // create new entry with the task
+          return {
+            ...old,
+            entries: [...old.entries, { day, tasks: [newTask] }],
+          };
+        }
       });
       onClose();
     },

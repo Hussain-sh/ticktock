@@ -16,8 +16,11 @@ export async function POST(
   const timesheet = timesheets.find((t) => t.week === Number(week));
   if (!timesheet) return NextResponse.json({ error: "Timesheet not found" }, { status: 404 });
 
-  const entry = timesheet.entries.find((e) => e.day === body.day);
-  if (!entry) return NextResponse.json({ error: "Day not found" }, { status: 404 });
+  let entry = timesheet.entries.find((e) => e.day === body.day);
+  if (!entry) {
+    entry = { day: body.day, tasks: [] };
+    timesheet.entries.push(entry);
+  }
 
   const newTask = {
     id: Date.now(),
