@@ -6,10 +6,11 @@ import DayRecord from "@/app/components/DayRecord";
 
 export default function TimesheetDetailPage() {
   const { week } = useParams();
+  const weekId = Number(week);
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["timesheet", week],
-    queryFn: () => getTimesheet(Number(week)),
+    queryKey: ["timesheet", weekId],
+    queryFn: () => getTimesheet(weekId),
   });
 
   if (isLoading) return <p>Loading...</p>;
@@ -25,7 +26,12 @@ export default function TimesheetDetailPage() {
       </div>
       <p className="text-sm font-normal text-gray-500">{data.date}</p>
       {data.entries.map((entry: TimesheetDetail) => (
-        <DayRecord key={entry.day} day={entry.day} tasks={entry.tasks} />
+        <DayRecord
+          key={entry.day}
+          day={entry.day}
+          tasks={entry.tasks}
+          week={weekId}
+        />
       ))}
     </section>
   );

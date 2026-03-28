@@ -8,23 +8,42 @@ import Link from "next/link";
 export default function TimesheetTable() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(5);
+  const [status, setStatus] = useState("");
+
+  const steps = [5, 10, 20];
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ["timesheets", page, limit],
-    queryFn: () => getTimesheets(page, limit),
+    queryKey: ["timesheets"],
+    queryFn: getTimesheets,
+    staleTime: 1000 * 60 * 5,
   });
-
-  const timesheets = data?.data ?? [];
-  const totalPages = data?.totalPages ?? 1;
 
   const onPageSizeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setLimit(Number(e.target.value));
     setPage(1);
   };
 
+  const getStatus = (hours: number) =>
+    hours >= 40 ? "completed" : hours > 0 ? "incomplete" : "missing";
+
+  const filtered =
+    data?.filter((row: Timesheet) =>
+      status ? getStatus(row.hours) === status : true,
+    ) ?? [];
+
+  const total = filtered.length ?? 0;
+  const totalPages = Math.ceil(total / limit);
+  const perPageOptions = [...steps.filter((n) => n < total), total];
+
+  const timesheets = filtered?.slice((page - 1) * limit, page * limit);
+
+  const onStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setStatus(e.target.value);
+    setPage(1);
+  };
+
   const getBadge = (hours: number) => {
-    const status =
-      hours >= 40 ? "completed" : hours > 0 ? "incomplete" : "missing";
+    const status = getStatus(hours);
 
     switch (status) {
       case "completed":
@@ -49,8 +68,7 @@ export default function TimesheetTable() {
   };
 
   const getActionText = (hours: number) => {
-    const status =
-      hours >= 40 ? "completed" : hours > 0 ? "incomplete" : "missing";
+    const status = getStatus(hours);
 
     switch (status) {
       case "completed":
@@ -61,10 +79,6 @@ export default function TimesheetTable() {
         return "Create";
     }
   };
-
-  const steps = [5, 10, 20];
-  const total = data?.total ?? 0;
-  const perPageOptions = [...steps.filter((n) => n < total), total];
 
   if (isLoading)
     return (
@@ -82,6 +96,19 @@ export default function TimesheetTable() {
 
   return (
     <div className="flex flex-col gap-4">
+      <div className="flex gap-3">
+        <select
+          value={status}
+          onChange={onStatusChange}
+          className="px-3 py-1.5 text-sm border border-gray-300 rounded-md bg-white text-gray-700"
+        >
+          <option value="">All Statuses</option>
+          <option value="completed">Completed</option>
+          <option value="incomplete">Incomplete</option>
+          <option value="missing">Missing</option>
+        </select>
+      </div>
+
       <div className="border border-gray-200 rounded-lg overflow-hidden overflow-x-auto">
         <table className="w-full min-w-[600px] text-sm">
           <thead className="bg-gray-50 border-b border-gray-200">

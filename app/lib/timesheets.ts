@@ -27,12 +27,22 @@ export interface TimesheetDetail extends Timesheet {
   tasks: Task[];
 }
 
-export async function getTimesheets(page: number, limit: number): Promise<TimesheetResponse> {
-  const response = await api.get(`/timesheets?page=${page}&limit=${limit}`);
+export async function getTimesheets(): Promise<Timesheet[]> {
+  const response = await api.get("/timesheets");
   return response.data;
 }
 
 export async function getTimesheet(week: number) {
   const response = await api.get(`/timesheets/${week}`);
+  return response.data;
+}
+
+export async function addTask(week: number, task: unknown) {
+  const response = await api.post(`/timesheets/${week}/tasks`, task);
+  return response.data;
+}
+
+export async function deleteTask(week: number, taskId: number) {
+  const response = await api.delete(`/timesheets/${week}/tasks/${taskId}`);
   return response.data;
 }

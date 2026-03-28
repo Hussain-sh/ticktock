@@ -1,11 +1,20 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useClickOutside } from "../hooks/useClickOutside";
-import { Task } from "../lib/timesheets";
+import { deleteTask, Task } from "../lib/timesheets";
 import Badge from "./ui-library/Badge";
 import { useState } from "react";
 
-function TaskMenu() {
+function TaskMenu({ week, taskId }: { week: number; taskId: number }) {
   const [open, setOpen] = useState(false);
   const menuRef = useClickOutside<HTMLDivElement>(() => setOpen(false));
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteTask(week, taskId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["timesheet", week] });
+    },
+  });
 
   return (
     <div className="relative" ref={menuRef}>
@@ -20,11 +29,15 @@ function TaskMenu() {
 
       {open && (
         <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
-          <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+          {/* <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
             Edit
-          </button>
-          <button className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-            Delete
+          </button> */}
+          <button
+            onClick={() => deleteMutation.mutate()}
+            disabled={deleteMutation.isPending}
+            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+          >
+            {deleteMutation.isPending ? "Deleting..." : "Delete"}
           </button>
         </div>
       )}
@@ -32,7 +45,15 @@ function TaskMenu() {
   );
 }
 
-export default function TaskList({ tasks }: { tasks: Task[] }) {
+export default function TaskList({
+  week,
+  tasks,
+  onAddTask,
+}: {
+  week: number;
+  tasks: Task[];
+  onAddTask: () => void;
+}) {
   return (
     <div className="flex flex-1 flex-col gap-2">
       {tasks.map((task) => (
@@ -50,12 +71,15 @@ export default function TaskList({ tasks }: { tasks: Task[] }) {
             <Badge bgColor="bg-blue-100" textColor="text-blue-800">
               {task.projectName}
             </Badge>
-            <TaskMenu />
+            <TaskMenu week={week} taskId={task.id} />
           </div>
         </div>
       ))}
 
-      <button className="w-full flex cursor-pointer items-center justify-center gap-2 px-2.5 py-3 bg-white border border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-500 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-800 transition-colors">
+      <button
+        onClick={onAddTask}
+        className="w-full flex cursor-pointer items-center justify-center gap-2 px-2.5 py-3 bg-white border border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-500 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-800 transition-colors"
+      >
         <svg
           className="w-4 h-4"
           fill="none"

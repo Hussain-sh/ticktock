@@ -7,31 +7,31 @@ export const timesheets = [
       {
         day: "Jan 1",
         tasks: [
-          { id: 1, projectName: "Project Alpha", taskName: "UI Design", taskDescription: "Designed the login page", hours: 8 },
+          { id: 1, projectId: 1, workTypeId: 1, taskName: "UI Design", taskDescription: "Designed the login page", hours: 8 },
         ],
       },
       {
         day: "Jan 2",
         tasks: [
-          { id: 2, projectName: "Project Beta", taskName: "API Integration", taskDescription: "Integrated auth endpoints", hours: 8 },
+          { id: 2, projectId: 2, workTypeId: 3, taskName: "API Integration", taskDescription: "Integrated auth endpoints", hours: 8 },
         ],
       },
       {
         day: "Jan 3",
         tasks: [
-          { id: 3, projectName: "Project Gamma", taskName: "Code Review", taskDescription: "Reviewed PR for dashboard", hours: 8 },
+          { id: 3, projectId: 3, workTypeId: 2, taskName: "Code Review", taskDescription: "Reviewed PR for dashboard", hours: 8 },
         ],
       },
       {
         day: "Jan 4",
         tasks: [
-          { id: 4, projectName: "Project Delta", taskName: "Bug Fix", taskDescription: "Fixed form validation issues", hours: 8 },
+          { id: 4, projectId: 4, workTypeId: 5, taskName: "Bug Fix", taskDescription: "Fixed form validation issues", hours: 8 },
         ],
       },
       {
         day: "Jan 5",
         tasks: [
-          { id: 5, projectName: "Project Epsilon", taskName: "Testing", taskDescription: "Wrote unit tests for auth flow", hours: 8 },
+          { id: 5, projectId: 5, workTypeId: 5, taskName: "Testing", taskDescription: "Wrote unit tests for auth flow", hours: 8 },
         ],
       },
     ],
@@ -41,11 +41,11 @@ export const timesheets = [
     date: "8 - 12 January, 2024",
     hours: 20,
     entries: [
-      { day: "Jan 8",  tasks: [{ id: 6, projectName: "Project Zeta", taskName: "Planning",       taskDescription: "Sprint planning meeting",    hours: 8 }] },
-      { day: "Jan 9",  tasks: [{ id: 7, projectName: "Project Eta", taskName: "UI Design",      taskDescription: "Designed dashboard layout",  hours: 8 }] },
-      { day: "Jan 10", tasks: [{ id: 8, projectName: "Project Theta", taskName: "Sick Leave",     taskDescription: "Sick leave",                 hours: 0 }] },
-      { day: "Jan 11", tasks: [{ id: 9, projectName: "Project Iota", taskName: "Sick Leave",     taskDescription: "Sick leave",                 hours: 0 }] },
-      { day: "Jan 12", tasks: [{ id: 10, projectName: "Project Kappa", taskName: "Documentation",  taskDescription: "Wrote API documentation",   hours: 4 }] },
+      { day: "Jan 8",  tasks: [{ id: 6, projectId: 2, workTypeId: 1, taskName: "Planning",       taskDescription: "Sprint planning meeting",    hours: 8 }] },
+      { day: "Jan 9",  tasks: [{ id: 7, projectId: 4, workTypeId: 2, taskName: "UI Design",      taskDescription: "Designed dashboard layout",  hours: 8 }] },
+      { day: "Jan 10", tasks: [{ id: 8, projectId: 5, workTypeId: 3, taskName: "Sick Leave",     taskDescription: "Sick leave",                 hours: 0 }] },
+      { day: "Jan 11", tasks: [{ id: 9, projectId: 1, workTypeId: 3, taskName: "Sick Leave",     taskDescription: "Sick leave",                 hours: 0 }] },
+      { day: "Jan 12", tasks: [{ id: 10, projectId: 3, workTypeId: 5, taskName: "Documentation",  taskDescription: "Wrote API documentation",   hours: 4 }] },
     ],
   },
   {
@@ -53,11 +53,11 @@ export const timesheets = [
     date: "15 - 19 January, 2024",
     hours: 0,
     entries: [
-      { day: "Jan 15", tasks: [{ id: 11, projectName: "Project Lambda", taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
-      { day: "Jan 16", tasks: [{ id: 12, projectName: "Project Mu", taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
-      { day: "Jan 17", tasks: [{ id: 13, projectName: "Project Nu", taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
-      { day: "Jan 18", tasks: [{ id: 14, projectName: "Project Xi", taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
-      { day: "Jan 19", tasks: [{ id: 15, projectName: "Project Omicron", taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
+      { day: "Jan 15", tasks: [{ id: 11, projectId: 2, workTypeId: 4, taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
+      { day: "Jan 16", tasks: [{ id: 12, projectId: 4, workTypeId: 4, taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
+      { day: "Jan 17", tasks: [{ id: 13, projectId: 5, workTypeId: 4, taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
+      { day: "Jan 18", tasks: [{ id: 14, projectId: 1, workTypeId: 4, taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
+      { day: "Jan 19", tasks: [{ id: 15, projectId: 3, workTypeId: 4, taskName: "Leave", taskDescription: "Annual leave", hours: 0 }] },
     ],
   },
   { week: 4,  date: "22 - 26 January, 2024",         hours: 40, entries: [] },
