@@ -10,7 +10,6 @@ export default function BlogLayout({
     <main className="flex flex-col gap-6 min-h-screen bg-gray-50">
       <Navbar />
       {children}
-      <Footer />
     </main>
   );
 }

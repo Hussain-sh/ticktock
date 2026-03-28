@@ -17,6 +17,9 @@ const config: Config = {
           600: "#1C64F2",
           700: "#1A56DB",
         },
+        secondary: {
+          strong: "#f9fafb",
+        },
       },
     },
   },

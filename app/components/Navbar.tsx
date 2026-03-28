@@ -10,14 +10,18 @@ interface User {
 export default async function Navbar() {
   const user = (await getUser()) as User | null;
   return (
-    <header className="flex justify-between p-4 bg-white shadow-sm">
-      <div className="flex gap-8 items-center">
+    <header className="bg-white shadow-sm">
+      <div className="w-full max-w-full px-6 py-4 flex items-center gap-8">
         <a href="#" className="text-2xl font-semibold text-gray-900">
           ticktock
         </a>
-        <h3 className="text-sm font-medium text-gray-900">Timesheets</h3>
+
+        <div className="flex-1 text-center lg:text-left">
+          <h3 className="text-sm font-medium text-gray-900">Timesheets</h3>
+        </div>
+
+        {user && <UserMenu name={user.name} />}
       </div>
-      {user && <UserMenu name={user.name} />}
     </header>
   );
 }

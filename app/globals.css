@@ -3,6 +3,7 @@
 :root {
   --background: #f8f8f8;
   --foreground: #171717;
+  --width-container: 1200px;
 }
 
 @theme inline {
@@ -20,4 +21,10 @@
 body {
   background: var(--background);
   color: var(--foreground);
+}
+
+.container-app {
+  max-width: var(--width-container);
+  margin-inline: auto;
+  width: 100%;
 }
