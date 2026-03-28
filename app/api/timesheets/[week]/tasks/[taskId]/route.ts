@@ -4,7 +4,7 @@ import { timesheets } from "@/app/lib/mockData/timesheets";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ week: number; taskId: number }> }
+  { params }: { params: Promise<{ week: string; taskId: string }> }
 ) {
   const cookieStore = await cookies();
   const token = cookieStore.get("token")?.value;
