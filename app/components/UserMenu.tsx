@@ -1,23 +1,13 @@
 "use client";
 import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { api } from "../lib/api";
+import { useClickOutside } from "../hooks/useClickOutside";
 
 export default function UserMenu({ name }: { name: string }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  // Close on outside click
-  useEffect(() => {
-    const handler = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
+  const menuRef = useClickOutside<HTMLDivElement>(() => setOpen(false));
 
   const handleLogout = async () => {
     try {
