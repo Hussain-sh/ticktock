@@ -1,8 +1,6 @@
-import { getServerSession } from "next-auth";
 import { Inter } from "next/font/google";
-import SessionProvider from "./components/SessionProvider";
-import QueryProvider from "./components/QueryProvider";
 import "./globals.css";
+import QueryProvider from "./components/QueryProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -11,13 +9,10 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getServerSession();
   return (
     <html lang="en" className={inter.className}>
       <body>
-        <SessionProvider session={session}>
-          <QueryProvider>{children}</QueryProvider>
-        </SessionProvider>
+        <QueryProvider>{children}</QueryProvider>
       </body>
     </html>
   );
