@@ -34,13 +34,9 @@ function TaskMenu({
       return Promise.resolve();
     },
     onSuccess: () => {
-      queryClient.setQueryData(["timesheet", week], (old: Timesheet) => ({
-        ...old,
-        entries: old.entries.map((e: Entry) => ({
-          ...e,
-          tasks: e.tasks.filter((t: Task) => t.id !== taskId),
-        })),
-      }));
+      queryClient.invalidateQueries({
+        queryKey: ["timesheet", week],
+      });
       setOpen(false);
     },
   });

@@ -92,20 +92,10 @@ export default function AddTaskModal({ week, day, onClose, task }: Props) {
         return Promise.resolve(newTask);
       }
     },
-    onSuccess: (updatedTask) => {
-      queryClient.setQueryData(["timesheet", week], (old: Timesheet) => ({
-        ...old,
-        entries: old.entries.map((e: Entry) => ({
-          ...e,
-          tasks: isEditing
-            ? e.tasks?.map((t: Task) =>
-                t.id === updatedTask.id ? updatedTask : t,
-              )
-            : e.day === day
-              ? { ...e, tasks: [...e.tasks, updatedTask] }
-              : e,
-        })),
-      }));
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["timesheet", week],
+      });
       onClose();
     },
   });
