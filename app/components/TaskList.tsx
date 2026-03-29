@@ -1,18 +1,47 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useClickOutside } from "../hooks/useClickOutside";
-import { deleteTask, Task } from "../lib/timesheets";
 import Badge from "./ui-library/Badge";
 import { useState } from "react";
+import {
+  deleteTaskFromStorage,
+  Timesheet,
+  Entry,
+  Task,
+} from "../lib/timesheets";
+import AddTaskModal from "./AddTaskModel";
 
-function TaskMenu({ week, taskId }: { week: number; taskId: number }) {
+function TaskMenu({
+  week,
+  taskId,
+  onEdit,
+}: {
+  week: number;
+  taskId: number;
+  onEdit: () => void;
+}) {
   const [open, setOpen] = useState(false);
   const menuRef = useClickOutside<HTMLDivElement>(() => setOpen(false));
   const queryClient = useQueryClient();
 
+  const handleEdit = () => {
+    onEdit();
+    setOpen(false);
+  };
+
   const deleteMutation = useMutation({
-    mutationFn: () => deleteTask(week, taskId),
+    mutationFn: () => {
+      deleteTaskFromStorage(week, taskId);
+      return Promise.resolve();
+    },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["timesheet", week] });
+      queryClient.setQueryData(["timesheet", week], (old: Timesheet) => ({
+        ...old,
+        entries: old.entries.map((e: Entry) => ({
+          ...e,
+          tasks: e.tasks.filter((t: Task) => t.id !== taskId),
+        })),
+      }));
+      setOpen(false);
     },
   });
 
@@ -29,9 +58,12 @@ function TaskMenu({ week, taskId }: { week: number; taskId: number }) {
 
       {open && (
         <div className="absolute right-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
-          {/* <button className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+          <button
+            onClick={handleEdit}
+            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+          >
             Edit
-          </button> */}
+          </button>
           <button
             onClick={() => deleteMutation.mutate()}
             disabled={deleteMutation.isPending}
@@ -49,14 +81,17 @@ export default function TaskList({
   week,
   tasks,
   onAddTask,
+  isReadOnly,
 }: {
   week: number;
   tasks: Task[];
   onAddTask: () => void;
+  isReadOnly: boolean;
 }) {
+  const [editTask, setEditTask] = useState<Task | null>(null);
   return (
     <div className="flex flex-1 flex-col gap-2">
-      {tasks.map((task) => (
+      {tasks?.map((task) => (
         <div
           key={task.id}
           className="flex bg-white rounded-lg shadow-sm justify-between items-start px-2.5 py-3"
@@ -71,30 +106,47 @@ export default function TaskList({
             <Badge bgColor="bg-blue-100" textColor="text-blue-800">
               {task.projectName}
             </Badge>
-            <TaskMenu week={week} taskId={task.id} />
+            {!isReadOnly && (
+              <TaskMenu
+                week={week}
+                taskId={task.id}
+                onEdit={() => setEditTask(task)}
+              />
+            )}
           </div>
         </div>
       ))}
 
-      <button
-        onClick={onAddTask}
-        className="w-full flex cursor-pointer items-center justify-center gap-2 px-2.5 py-3 bg-white border border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-500 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-800 transition-colors"
-      >
-        <svg
-          className="w-4 h-4"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2}
+      {!isReadOnly && (
+        <button
+          onClick={onAddTask}
+          className="w-full flex cursor-pointer items-center justify-center gap-2 px-2.5 py-3 bg-white border border-dashed border-gray-300 rounded-lg text-sm font-medium text-gray-500 hover:bg-blue-100 hover:border-blue-400 hover:text-blue-800 transition-colors"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="M12 4v16m8-8H4"
-          />
-        </svg>
-        Add new task
-      </button>
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
+          Add new task
+        </button>
+      )}
+
+      {editTask && (
+        <AddTaskModal
+          week={week}
+          day=""
+          task={editTask}
+          onClose={() => setEditTask(null)}
+        />
+      )}
     </div>
   );
 }

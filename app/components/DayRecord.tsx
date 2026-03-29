@@ -8,10 +8,12 @@ export default function DayRecord({
   day,
   tasks,
   week,
+  isReadOnly,
 }: {
   day: string;
   tasks: Task[];
   week: number;
+  isReadOnly: boolean;
 }) {
   const [showModal, setShowModal] = useState(false);
   return (
@@ -21,6 +23,7 @@ export default function DayRecord({
         week={week}
         tasks={tasks}
         onAddTask={() => setShowModal(true)}
+        isReadOnly={isReadOnly}
       />
       {showModal && (
         <AddTaskModal

@@ -2,13 +2,20 @@
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { addTask } from "../lib/timesheets";
+import {
+  addTaskToStorage,
+  Timesheet,
+  Entry,
+  Task,
+  updateTaskInStorage,
+} from "../lib/timesheets";
 import { api } from "../lib/api";
 
 interface Props {
   week: number;
   day: string;
   onClose: () => void;
+  task?: Task;
 }
 
 interface TaskFormValues {
@@ -18,21 +25,12 @@ interface TaskFormValues {
   hours: number;
 }
 
-interface Task {
+interface WorkType {
   id: number;
-  projectId: number;
-  workTypeId: number;
-  taskDescription: string;
-  hours: number;
 }
 
-interface TimesheetEntry {
-  day: string;
-  tasks: Task[];
-}
-
-interface Data {
-  entries: TimesheetEntry[];
+interface ProjectType {
+  id: number;
 }
 
 const validationSchema = Yup.object({
@@ -47,7 +45,8 @@ const validationSchema = Yup.object({
     .max(8, "Maximum 8h"),
 });
 
-export default function AddTaskModal({ week, day, onClose }: Props) {
+export default function AddTaskModal({ week, day, onClose, task }: Props) {
+  const isEditing = !!task;
   const queryClient = useQueryClient();
 
   const { data: projects = [] } = useQuery({
@@ -61,39 +60,61 @@ export default function AddTaskModal({ week, day, onClose }: Props) {
   });
 
   const mutation = useMutation({
-    mutationFn: (values: TaskFormValues) => addTask(week, { ...values, day }),
-    onSuccess: (newTask) => {
-      queryClient.setQueryData(["timesheet", week], (old: Data) => {
-        const existingEntry = old.entries.find(
-          (e: { day: string; tasks: Task[] }) => e.day === day,
-        );
+    mutationFn: (values: TaskFormValues) => {
+      const workType = workTypes.find(
+        (w: WorkType) => w.id === Number(values.workTypeId),
+      );
+      const project = projects.find(
+        (p: ProjectType) => p.id === Number(values.projectId),
+      );
 
-        if (existingEntry) {
-          // add task to existing entry
-          return {
-            ...old,
-            entries: old.entries.map((e: TimesheetEntry) =>
-              e.day === day ? { ...e, tasks: [...e.tasks, newTask] } : e,
-            ),
-          };
-        } else {
-          // create new entry with the task
-          return {
-            ...old,
-            entries: [...old.entries, { day, tasks: [newTask] }],
-          };
-        }
-      });
+      if (isEditing) {
+        const updatedTask: Task = {
+          ...task,
+          taskName: workType?.name ?? "",
+          taskDescription: values.taskDescription,
+          hours: values.hours as number,
+          projectId: Number(values.projectId),
+          workTypeId: Number(values.workTypeId),
+          projectName: project?.name ?? "",
+        };
+        updateTaskInStorage(week, updatedTask);
+        return Promise.resolve(updatedTask);
+      } else {
+        const newTask = addTaskToStorage(week, day, {
+          taskName: workType?.name ?? "",
+          taskDescription: values.taskDescription,
+          hours: values.hours as number,
+          projectId: Number(values.projectId),
+          workTypeId: Number(values.workTypeId),
+          projectName: project?.name ?? "",
+        });
+        return Promise.resolve(newTask);
+      }
+    },
+    onSuccess: (updatedTask) => {
+      queryClient.setQueryData(["timesheet", week], (old: Timesheet) => ({
+        ...old,
+        entries: old.entries.map((e: Entry) => ({
+          ...e,
+          tasks: isEditing
+            ? e.tasks?.map((t: Task) =>
+                t.id === updatedTask.id ? updatedTask : t,
+              )
+            : e.day === day
+              ? { ...e, tasks: [...e.tasks, updatedTask] }
+              : e,
+        })),
+      }));
       onClose();
     },
   });
-
   const formik = useFormik<TaskFormValues>({
     initialValues: {
-      projectId: "",
-      workTypeId: "",
-      taskDescription: "",
-      hours: 1,
+      projectId: task?.projectId ?? "",
+      workTypeId: task?.workTypeId ?? "",
+      taskDescription: task?.taskDescription ?? "",
+      hours: task?.hours ?? 1,
     },
     validationSchema,
     onSubmit: (values) => {
@@ -117,7 +138,9 @@ export default function AddTaskModal({ week, day, onClose }: Props) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6 flex flex-col gap-5">
         <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-900">Add New Task</h2>
+          <h2 className="text-lg font-semibold text-gray-900">
+            {isEditing ? "Edit Task" : "Add New Task"}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 cursor-pointer"
@@ -264,7 +287,11 @@ export default function AddTaskModal({ week, day, onClose }: Props) {
               disabled={mutation.isPending}
               className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 cursor-pointer"
             >
-              {mutation.isPending ? "Saving..." : "Add Task"}
+              {mutation.isPending
+                ? "Saving..."
+                : isEditing
+                  ? "Save Changes"
+                  : "Add Task"}
             </button>
             <button
               type="button"
